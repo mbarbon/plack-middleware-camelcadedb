@@ -1,0 +1,18 @@
+Build.PL
+Changes
+lib/Plack/Middleware/Camelcadedb.pm
+MANIFEST
+META.yml
+META.json
+t/001_load.t
+# t/010_basic.t
+# t/080_enbugger.t
+# t/082_no_enbugger.t
+# t/083_no_enbugger_threads.t
+# t/apps/base.psgi
+# t/apps/enbugger.psgi
+# t/apps/lib/App/Base.pm
+# t/apps/no_enbugger.psgi
+# t/lib/Test.pm
+# t/scripts/curl.pl
+# t/scripts/plackup.pl
