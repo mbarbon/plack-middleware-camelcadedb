@@ -17,8 +17,6 @@ Plack::Middleware::Camelcadedb - interactive debugging for Plack applications
         $app;
     };
 
-=back
-
 =cut
 
 use strict;
