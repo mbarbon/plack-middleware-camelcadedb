@@ -24,7 +24,7 @@ Plack::Middleware::Camelcadedb - interactive debugging for Plack applications
 use strict;
 use warnings;
 
-our $VERSION = '0.01_02';
+our $VERSION = '0.02';
 
 use constant {
     DEBUG_SINGLE_STEP_ON        =>  0x20,
@@ -44,51 +44,12 @@ our @ISA;
 sub import {
     my ($class, %args) = @_;
 
-    die "Specify either 'remote_host' or 'client_socket'"
-        unless $args{remote_host} || $args{client_socket};
+    die "Specify 'remote_host'"
+        unless $args{remote_host};
+    my ($host, $port) = split /:/, $args{remote_host}, 2;
 
-    if (!$args{remote_host}) {
-        die "Not supported yet";
-
-        my $error;
-        my ($user, $dbgp_client_dir) = @args{qw(user client_dir)};
-        my $group = getgrnam($)) || (split / /, $))[0];
-
-        if (!$user || !$dbgp_client_dir) {
-            # pass through and hope for the best
-        } elsif (-d $dbgp_client_dir) {
-            my ($mode, $uid, $gid) = (stat($dbgp_client_dir))[2, 4, 5];
-            my $user_id = getpwnam($user) || die "Can't retrieve the UID for $user";
-
-            $error = sprintf "invalid UID %d, should be %d", $uid, $user_id
-                unless $uid == $user_id;
-            $error = sprintf "invalid GID %d, should be %d", $gid, $)
-                unless $gid == $);
-            $error = sprintf "invalid permissions bits %04o, should be 0770", $mode & 0777
-                unless ($mode & 0777) == 0770;
-        } else {
-            $error = "directory not found";
-        }
-
-        if ($error) {
-            print STDERR <<"EOT";
-There was the following issue with the DBGp client directory '$dbgp_client_dir': $error
-
-You can fix it by running:
-\$ sudo sh -c 'rm -rf $dbgp_client_dir &&
-      mkdir $dbgp_client_dir &&
-      chmod 2770 $dbgp_client_dir &&
-      chown $user:$group $dbgp_client_dir'
-EOT
-            exit 1;
-        }
-    } else {
-        my ($host, $port) = split /:/, $args{remote_host}, 2;
-
-        $ENV{PERL5_DEBUG_HOST} = $host;
-        $ENV{PERL5_DEBUG_PORT} = $port;
-    }
-
+    $ENV{PERL5_DEBUG_HOST} = $host;
+    $ENV{PERL5_DEBUG_PORT} = $port;
     $ENV{PERL5_DEBUG_ROLE} = 'client';
     $ENV{PERL5_DEBUG_AUTOSTART} = 0;
 

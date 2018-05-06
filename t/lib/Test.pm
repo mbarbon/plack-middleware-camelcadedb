@@ -5,20 +5,7 @@ use strict;
 use warnings;
 use parent 'Test::Builder::Module';
 
-BEGIN {
-    if (!$ENV{REMOTE_DEBUGGER}) {
-        require Devel::Debug::DBGp;
-
-        $ENV{REMOTE_DEBUGGER} = Devel::Debug::DBGp->debugger_path;
-    }
-
-    die "\$ENV{REMOTE_DEBUGGER} not set" unless $ENV{REMOTE_DEBUGGER};
-    die "\$ENV{REMOTE_DEBUGGER} not set correctly" unless
-        -f "$ENV{REMOTE_DEBUGGER}/perl5db.pl";
-}
-
 use Test::More;
-use Test::DBGp;
 use HTTP::CookieJar;
 
 use IPC::Open3 ();
@@ -31,7 +18,6 @@ require feature;
 
 our @EXPORT = (
   @Test::More::EXPORT,
-  @Test::DBGp::EXPORT,
   qw(
         abs_uri
         run_app
@@ -67,9 +53,6 @@ sub abs_uri {
     return 'file://' . Cwd::abs_path($_[0]);
 }
 
-sub start_listening { dbgp_listen() }
-sub stop_listening { dbgp_stop_listening() }
-
 sub run_app {
     my ($app) = @_;
 
@@ -90,8 +73,6 @@ sub run_app {
     die "Unable to find a free port for HTTP in the 17000 - 19000 port range"
         unless $HTTP_PORT;
 
-    local $ENV{DEBUGGER_PORT} = dbgp_listening_port();
-    local $ENV{DEBUGGER_PATH} = dbgp_listening_path();
     $CHILD_ERR = gensym;
     $PID = IPC::Open3::open3(
         $CHILD_IN, $CHILD_OUT, $CHILD_ERR,
@@ -191,32 +172,6 @@ sub response_is {
             }
         }
     }
-}
-
-sub wait_connection { dbgp_wait_connection($PID, @_) }
-sub discard_connection { dbgp_wait_connection($PID, 'reject') }
-
-sub send_command { dbgp_send_command(@_) }
-
-sub init_is {
-    local $Test::Builder::Level = $Test::Builder::Level + 1;
-
-    dbgp_init_is(@_);
-}
-
-sub command_is {
-    local $Test::Builder::Level = $Test::Builder::Level + 1;
-
-    dbgp_command_is(@_);
-}
-
-sub eval_value_is {
-    local $Test::Builder::Level = $Test::Builder::Level + 1;
-
-    my ($expr, $value) = @_;
-    my $res = send_command('eval', encode_base64($expr));
-
-    is($res->result->value, $value);
 }
 
 sub _cleanup {
