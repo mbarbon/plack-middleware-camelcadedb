@@ -35,7 +35,7 @@ execution continues as normal.
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use constant {
     DEBUG_SINGLE_STEP_ON        =>  0x20,
